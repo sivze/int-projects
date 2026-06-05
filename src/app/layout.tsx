@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Interview Project",
-  description: "Reusable take-home interview skeleton"
+  title: "Project Template",
+  description: "Reusable Next.js, Vercel, Supabase, and GitHub template"
 };
 
 export default function RootLayout({

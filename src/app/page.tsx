@@ -3,8 +3,8 @@ import { ArrowRight, CheckCircle2, Github, Rocket } from "lucide-react";
 const checks = [
   "Next.js app router",
   "Vercel-ready config",
-  "Supabase env placeholders",
-  "GitHub-friendly skeleton"
+  "Supabase configured",
+  "GitHub-ready repo"
 ];
 
 export default function Home() {
@@ -20,12 +20,12 @@ export default function Home() {
       <section className="intro">
         <div className="eyebrow">
           <Rocket size={16} aria-hidden="true" />
-          Interview starter
+          Project template
         </div>
-        <h1>Hello from the take-home skeleton.</h1>
+        <h1>Hello from the project template.</h1>
         <p>
-          A clean deployable base for AI coding interviews: fast to push, easy
-          to share, and small enough to adapt per assignment.
+          A clean deployable base with Next.js, Vercel, Supabase, and GitHub
+          already wired together.
         </p>
         <div className="actions">
           <a href={siteUrl} className="primary">
