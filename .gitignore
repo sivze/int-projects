@@ -16,6 +16,7 @@ build
 
 # vercel
 .vercel
+.vercel-*
 
 # logs
 npm-debug.log*
