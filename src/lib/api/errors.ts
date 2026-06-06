@@ -15,7 +15,10 @@ export function errorResponse(error: unknown) {
   }
 
   const message = error instanceof Error ? error.message : "Unexpected server error.";
-  console.error(error);
+  console.error("API request failed", {
+    name: error instanceof Error ? error.name : "UnknownError",
+    message
+  });
 
   return NextResponse.json({ error: message }, { status: 500 });
 }
