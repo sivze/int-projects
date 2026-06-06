@@ -1,115 +1,86 @@
-# Uplane Image Transform
+# Interview Projects
 
-Full-stack TypeScript image transformation service for the Uplane engineering
-assignment.
+Shared Next.js workspace for interview and take-home projects.
 
-The app lets a user upload an image, remove its background with Replicate BRIA,
-flip the result horizontally with `sharp`, host the processed image in Supabase
-Storage, copy a unique URL, view recent uploads, and delete uploaded/processed
-assets.
+This repository is intentionally one deployable app. Each assignment gets its own
+route and project folder, while shared dependencies, deployment config, and
+environment setup stay at the repo root.
 
-## Live Demo
+## Projects
 
-Deployment target: `https://int-projects.vercel.app/uplane`
-
-## Tech Stack
-
-- Next.js App Router
-- TypeScript
-- Replicate BRIA for third-party background removal
-- `sharp` for local image flipping
-- Supabase Postgres for image metadata
-- Supabase Storage for original and processed image hosting
+| Project | Route | Docs |
+| --- | --- | --- |
+| Uplane Image Transform | `/uplane` | [`projects/uplane/README.md`](projects/uplane/README.md) |
 
 ## Local Development
+
+Install and run from the repository root:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open `http://localhost:3000/uplane`.
+Open:
+
+```text
+http://localhost:3000/uplane
+```
+
+The root route redirects to the active project route.
 
 ## Environment
 
-Copy `.env.example` to `.env.local` and fill in:
+Create `.env.local` at the repository root. Do not commit it.
+
+Required for the Uplane project:
 
 ```text
-NEXT_PUBLIC_SITE_URL=
+NEXT_PUBLIC_SITE_URL=https://int-projects.vercel.app/uplane
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 REPLICATE_API_TOKEN=
 ```
 
-`SUPABASE_SERVICE_ROLE_KEY` and `REPLICATE_API_TOKEN` are server-only. They must
-not use the `NEXT_PUBLIC_` prefix.
+Server-only variables must not use the `NEXT_PUBLIC_` prefix.
 
-## API Design
+## Deploy
 
-```text
-POST   /api/images
-GET    /api/images
-POST   /api/images/:id/remove-background
-POST   /api/images/:id/flip
-DELETE /api/images/:id
+Deploy from the repository root.
+
+For Vercel:
+
+```bash
+npx vercel --prod
 ```
 
-The UI intentionally exposes the two process steps as separate actions:
+Use the repository root as the project root in Vercel. Do not deploy from
+`projects/uplane`; that folder contains project-specific documentation, not a
+separate app package.
 
-1. Upload image.
-2. Remove background.
-3. Flip horizontally.
-4. Copy or open the processed URL.
-5. Delete the image set.
-
-## Data Model
-
-Supabase table: `uplane_images`
-
-One row represents one uploaded image and its latest processed result.
+The deployed Uplane URL is:
 
 ```text
-original_url      uploaded source image
-processed_url     latest transformed image
-processed_stage   none | background_removed | flipped
-status            uploaded | processing | complete | failed | deleted
+https://int-projects.vercel.app/uplane
 ```
-
-The user-facing model is simple: original image and processed image. Internally,
-the app stores separate objects under `uplane/{id}/` so deletion can remove the
-entire image set.
-
-## Storage
-
-Bucket: `uplane-images`
-
-Paths:
-
-```text
-uplane/{id}/original.{ext}
-uplane/{id}/processed-bg.png
-uplane/{id}/processed-flipped-horizontal.png
-uplane/{id}/processed-flipped-vertical.png
-```
-
-Processed outputs are PNG to preserve transparency after background removal.
-
-## Tradeoffs
-
-- Processing is synchronous in the API route for clarity and a small take-home
-  scope. At production scale, background removal and flip should move to queued
-  jobs with polling or realtime status updates.
-- Uploads are limited to PNG, JPEG, and WebP under 8 MB. HEIC/HEIF and image
-  downscaling are reasonable future improvements but add complexity that is not
-  central to the assignment.
-- The final processed image is hosted in Supabase Storage rather than relying on
-  the Replicate delivery URL, so retrieval and deletion are under app control.
 
 ## Verification
+
+Run from the repository root:
 
 ```bash
 npm test
 npm run lint
 npm run build
 ```
+
+## Adding Future Projects
+
+Use the same pattern:
+
+- Add a route under `src/app/<project>/`.
+- Keep project docs under `projects/<project>/`.
+- Namespace storage, tables, and API routes when the project needs separate
+  backend resources.
+- Keep shared environment and deployment config at the repository root.

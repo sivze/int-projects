@@ -322,29 +322,20 @@ src/components/image-transform-app.tsx
   API error modules.
 - Built API routes for upload/list, background removal, flip, and delete.
 - Built the upload, transform, preview, history, copy URL, and delete UI.
-- Updated README and `.env.example`.
-- Verified unit tests and lint locally.
+- Updated root README, project README, implementation plan, and `.env.example`.
+- Added local server secrets in `.env.local`.
+- Verified unit tests, lint, and production build locally.
+- Verified full local flow: upload, background removal, horizontal flip, public
+  processed URL, and delete cleanup.
 
 ### Remaining
 
-1. Add local secrets and deployment env.
-   - Add `REPLICATE_API_TOKEN` to local `.env.local`.
-   - Add `SUPABASE_SERVICE_ROLE_KEY` to local `.env.local`.
+1. Add deployment env.
    - Add `REPLICATE_API_TOKEN` to Vercel production env.
    - Add `SUPABASE_SERVICE_ROLE_KEY` to Vercel production env.
    - Keep it server-only; no `NEXT_PUBLIC_` prefix.
 
-2. Verify locally.
-   - Upload valid PNG/JPEG/WebP.
-   - Reject invalid MIME and oversized files.
-   - Run background removal.
-   - Run horizontal flip.
-   - Confirm final URL opens publicly.
-   - Confirm history reload shows original and latest processed image.
-   - Delete and confirm storage objects/record are removed or marked deleted.
-
-3. Polish submission.
-   - Run `npm run build`.
+2. Polish submission.
    - Run a browser visual pass on desktop and mobile.
    - Deploy Uplane branch to Vercel.
    - Submit deployed URL and GitHub branch.
