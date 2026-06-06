@@ -330,15 +330,23 @@ src/components/image-transform-app.tsx
 - Verified unit tests, lint, and production build locally.
 - Verified full local flow: upload, background removal, horizontal flip, public
   processed URL, and delete cleanup.
+- Added Vercel production env for `REPLICATE_API_TOKEN` and
+  `SUPABASE_SERVICE_ROLE_KEY`.
+- Deployed the Uplane branch to Vercel:
+  `https://int-projects.vercel.app/uplane`.
+- Verified production flow: upload, Replicate background removal, horizontal
+  flip, public processed URL, and delete cleanup.
+- Verified desktop and mobile browser layout for the deployed app.
 
 ### Remaining
 
-1. Add deployment env.
-   - Add `REPLICATE_API_TOKEN` to Vercel production env.
-   - Add `SUPABASE_SERVICE_ROLE_KEY` to Vercel production env.
-   - Keep it server-only; no `NEXT_PUBLIC_` prefix.
+None for the current submission.
 
-2. Polish submission.
-   - Run a browser visual pass on desktop and mobile.
-   - Deploy Uplane branch to Vercel.
-   - Submit deployed URL and GitHub branch.
+Useful next-round improvements:
+
+1. Move processing to a queue with persisted step attempts.
+2. Add realtime or polling status updates for longer-running files.
+3. Add image downscaling for very large uploads to control latency and cost.
+4. Add private object storage with signed URLs if user-specific auth is added.
+5. Add a transparent-background download action using the stored intermediate
+   `processed-bg.png`.
