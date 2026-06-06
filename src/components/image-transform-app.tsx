@@ -437,36 +437,36 @@ export function ImageTransformApp() {
                         className={`history-item${
                           image.id === selectedImage?.id ? " history-item-active" : ""
                         }${isRemoving ? " history-item-removing" : ""}`}
-                        role="button"
-                        tabIndex={0}
-                        onClick={() => setSelectedId(image.id)}
-                        onKeyDown={(event) => {
-                          if (event.key === "Enter" || event.key === " ") {
-                            event.preventDefault();
-                            setSelectedId(image.id);
-                          }
-                        }}
                       >
-                        <span className="history-thumb">
-                          {image.processedUrl || image.originalUrl ? (
-                            <Image
-                              src={image.processedUrl ?? image.originalUrl}
-                              alt=""
-                              fill
-                              sizes="52px"
-                            />
+                        <button
+                          type="button"
+                          className="history-select"
+                          onClick={() => setSelectedId(image.id)}
+                        >
+                          <span className="history-thumb">
+                            {image.processedUrl || image.originalUrl ? (
+                              <Image
+                                src={image.processedUrl ?? image.originalUrl}
+                                alt=""
+                                fill
+                                sizes="52px"
+                              />
+                            ) : (
+                              <span className="skeleton skeleton-thumb" />
+                            )}
+                          </span>
+                          <span className="history-meta">
+                            <strong>{image.originalFileName}</strong>
+                            <span className="history-stage">{stageLabel(image)}</span>
+                            <Badge tone={statusTone(image.status)}>{image.status}</Badge>
+                          </span>
+                          {image.status === "processing" || isTemp ? (
+                            <Loader2 className="spin" size={18} aria-hidden="true" />
                           ) : (
-                            <span className="skeleton skeleton-thumb" />
+                            <Check size={18} aria-hidden="true" />
                           )}
-                        </span>
-                        <span className="history-meta">
-                          <strong>{image.originalFileName}</strong>
-                          <span className="history-stage">{stageLabel(image)}</span>
-                          <Badge tone={statusTone(image.status)}>{image.status}</Badge>
-                        </span>
-                        {image.status === "processing" || isTemp ? (
-                          <Loader2 className="spin" size={18} aria-hidden="true" />
-                        ) : isArmed ? (
+                        </button>
+                        {isArmed ? (
                           <span
                             className="row-confirm"
                             onClick={(event) => event.stopPropagation()}

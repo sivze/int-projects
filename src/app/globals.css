@@ -192,6 +192,8 @@ a {
 .workspace-grid {
   display: grid;
   gap: 18px;
+  min-width: 0;
+  width: 100%;
 }
 
 .top-row {
@@ -199,9 +201,12 @@ a {
   grid-template-columns: minmax(0, 1fr) 340px;
   gap: 18px;
   align-items: stretch;
+  min-width: 0;
+  width: 100%;
 }
 
 .card {
+  min-width: 0;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface);
@@ -507,6 +512,7 @@ a {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
   margin-top: 14px;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
@@ -525,6 +531,7 @@ a {
 
 .url-panel code {
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   color: var(--ink);
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
@@ -538,6 +545,8 @@ a {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 18px;
+  min-width: 0;
+  width: 100%;
 }
 
 .preview-card {
@@ -649,16 +658,12 @@ a {
 .history-item {
   position: relative;
   display: grid;
-  grid-template-columns: 52px minmax(0, 1fr) auto;
-  gap: 11px;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   width: 100%;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   background: var(--surface);
-  padding: 9px;
-  text-align: left;
-  cursor: pointer;
   overflow: hidden;
   transition: border-color 0.18s var(--ease), box-shadow 0.18s var(--ease),
     transform 0.18s var(--ease);
@@ -676,6 +681,26 @@ a {
 
 .history-item-removing {
   animation: collapse 0.28s var(--ease) forwards;
+}
+
+.history-select {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  gap: 11px;
+  align-items: center;
+  min-width: 0;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 9px;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.history-select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
 }
 
 @keyframes collapse {
@@ -727,7 +752,6 @@ a {
   place-items: center;
   align-self: stretch;
   width: 42px;
-  margin: -9px -9px -9px 0;
   border: none;
   border-left: 1px solid var(--line);
   border-radius: 0;
@@ -750,7 +774,6 @@ a {
   align-items: center;
   gap: 6px;
   align-self: stretch;
-  margin: -9px -9px -9px 0;
   padding: 0 10px;
   border-left: 1px solid var(--line);
   animation: confirm-in 0.18s var(--ease);
@@ -805,11 +828,11 @@ a {
 @media (max-width: 980px) {
   .top-row,
   .preview-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .history-card {
-    min-height: 0;
+    min-height: 260px;
     max-height: 360px;
   }
 
