@@ -27,10 +27,10 @@ function statusTone(status: UplaneImage["status"]) {
 }
 
 function stageLabel(image: UplaneImage | null) {
-  if (!image?.processedUrl) return "No processed image yet";
-  if (image.processedStage === "flipped") return "Background removed + flipped";
-  if (image.processedStage === "background_removed") return "Background removed";
-  return "Processed";
+  if (!image?.processedUrl) return "Processing has not completed";
+  if (image.processedStage === "flipped") return "Final image ready";
+  if (image.processedStage === "background_removed") return "Removing background";
+  return "Processing";
 }
 
 async function readError(response: Response) {
@@ -188,7 +188,7 @@ export function ImageTransformApp() {
   const copyProcessedUrl = useCallback(async () => {
     if (!selectedImage?.processedUrl) return;
     await navigator.clipboard.writeText(selectedImage.processedUrl);
-    showNotice("Processed URL copied.", "success");
+    showNotice("Final URL copied.", "success");
   }, [selectedImage, showNotice]);
 
   const isProcessing = selectedImage?.status === "processing";
@@ -255,8 +255,8 @@ export function ImageTransformApp() {
           <Card>
             <div className="card-heading">
               <div>
-                <h2>Processing</h2>
-                <p>Backend removes the background, flips horizontally, and stores the final PNG.</p>
+                <h2>Final output</h2>
+                <p>Background removed, horizontally flipped, and hosted as a PNG.</p>
               </div>
               {selectedImage ? (
                 <Badge tone={statusTone(selectedImage.status)}>{selectedImage.status}</Badge>
@@ -273,13 +273,24 @@ export function ImageTransformApp() {
             <div className="action-row">
               <Button
                 type="button"
-                variant="ghost"
+                variant="primary"
                 onClick={copyProcessedUrl}
                 disabled={!canShare}
               >
                 <Clipboard size={18} />
-                Copy URL
+                Copy final URL
               </Button>
+              {selectedImage?.processedUrl ? (
+                <a
+                  className="button button-secondary"
+                  href={selectedImage.processedUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <ExternalLink size={18} aria-hidden="true" />
+                  Open final image
+                </a>
+              ) : null}
               <Button
                 type="button"
                 variant="danger"
@@ -287,8 +298,13 @@ export function ImageTransformApp() {
                 disabled={!selectedImage || busyAction !== null}
               >
                 <Trash2 size={18} />
-                Delete
+                Delete image set
               </Button>
+            </div>
+
+            <div className="url-panel">
+              <span>Final URL</span>
+              <code>{selectedImage?.processedUrl ?? "Available after processing"}</code>
             </div>
 
             {selectedImage?.error ? (
@@ -297,11 +313,15 @@ export function ImageTransformApp() {
           </Card>
 
           <div className="preview-grid">
-            <PreviewCard title="Original" url={selectedImage?.originalUrl ?? null} />
             <PreviewCard
-              title="Processed"
+              title="Final processed image"
               subtitle={stageLabel(selectedImage)}
               url={selectedImage?.processedUrl ?? null}
+            />
+            <PreviewCard
+              title="Original upload"
+              subtitle="Reference"
+              url={selectedImage?.originalUrl ?? null}
             />
           </div>
         </div>
@@ -310,7 +330,7 @@ export function ImageTransformApp() {
           <div className="card-heading">
             <div>
               <h2>Recent images</h2>
-              <p>Select an item to preview, copy its URL, or delete it.</p>
+              <p>Select an item to preview its final image.</p>
             </div>
           </div>
 

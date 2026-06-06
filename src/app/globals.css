@@ -192,6 +192,7 @@ a {
   border-radius: 8px;
   padding: 0 12px;
   font-weight: 800;
+  white-space: nowrap;
   cursor: pointer;
 }
 
@@ -274,6 +275,34 @@ a {
   padding: 10px 12px;
   color: var(--ink);
   font-weight: 700;
+}
+
+.url-panel {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-subtle);
+  padding: 10px 12px;
+}
+
+.url-panel span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.url-panel code {
+  overflow: hidden;
+  color: var(--ink);
+  font-family:
+    "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .preview-grid {

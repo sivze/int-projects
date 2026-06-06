@@ -5,8 +5,8 @@ assignment.
 
 The app lets a user upload an image, remove its background with Replicate BRIA,
 flip the result horizontally with `sharp`, host the processed image in Supabase
-Storage, copy a unique URL, view recent uploads, and delete uploaded/processed
-assets.
+Storage, copy the final processed URL, view recent uploads, and delete
+uploaded/processed assets.
 
 ## Live Demo
 
@@ -73,7 +73,7 @@ returning the processed record:
 1. Upload image.
 2. Remove background with Replicate BRIA.
 3. Flip the background-removed image horizontally with `sharp`.
-4. Copy or open the processed URL.
+4. Copy or open the final processed URL.
 5. Delete the image set.
 
 ## Data Model
