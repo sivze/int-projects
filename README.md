@@ -10,7 +10,7 @@ assets.
 
 ## Live Demo
 
-Deployment target: `https://int-projects.vercel.app`
+Deployment target: `https://int-projects.vercel.app/uplane`
 
 ## Tech Stack
 
@@ -28,7 +28,7 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:3000`.
+Open `http://localhost:3000/uplane`.
 
 ## Environment
 

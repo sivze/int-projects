@@ -1,5 +1,5 @@
-import { ImageTransformApp } from "@/components/image-transform-app";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return <ImageTransformApp />;
+  redirect("/uplane");
 }
