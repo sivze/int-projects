@@ -13,6 +13,8 @@ import { flipImage } from "@/lib/images/transform";
 import { validateImageUpload } from "@/lib/images/validation";
 
 export const runtime = "nodejs";
+// Background removal (Replicate) + flip can exceed the default 10s limit.
+export const maxDuration = 60;
 
 export async function GET() {
   try {

@@ -14,11 +14,14 @@ export function errorResponse(error: unknown) {
     return NextResponse.json({ error: error.message }, { status: error.status });
   }
 
-  const message = error instanceof Error ? error.message : "Unexpected server error.";
+  // Log the real error server-side, but never leak internal detail to the client.
   console.error("API request failed", {
     name: error instanceof Error ? error.name : "UnknownError",
-    message
+    message: error instanceof Error ? error.message : "Unknown error"
   });
 
-  return NextResponse.json({ error: message }, { status: 500 });
+  return NextResponse.json(
+    { error: "Something went wrong while processing the image. Please try again." },
+    { status: 500 }
+  );
 }

@@ -18,7 +18,8 @@ export async function listImages(
     .from(TABLE_NAME)
     .select("*")
     .is("deleted_at", null)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(50);
 
   if (error) {
     throw new Error(`Image list failed: ${error.message}`);
