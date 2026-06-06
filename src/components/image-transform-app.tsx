@@ -4,8 +4,6 @@ import {
   Check,
   Clipboard,
   ExternalLink,
-  FlipHorizontal2,
-  ImageIcon,
   Loader2,
   Trash2,
   Upload
@@ -14,7 +12,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Badge, Button, Card, EmptyState } from "./ui";
-import type { FlipDirection, UplaneImage } from "@/lib/images/types";
+import type { UplaneImage } from "@/lib/images/types";
 
 type Notice = {
   tone: "success" | "danger" | "neutral";
@@ -121,14 +119,15 @@ export function ImageTransformApp() {
 
         const body = (await response.json()) as { image: UplaneImage };
         upsertImage(body.image);
-        showNotice("Image uploaded.", "success");
+        showNotice("Image processed.", "success");
       } catch (error) {
-        showNotice(error instanceof Error ? error.message : "Upload failed.", "danger");
+        showNotice(error instanceof Error ? error.message : "Processing failed.", "danger");
+        await loadImages();
       } finally {
         setBusyAction(null);
       }
     },
-    [showNotice, upsertImage]
+    [loadImages, showNotice, upsertImage]
   );
 
   const onDrop = useCallback(
@@ -155,46 +154,6 @@ export function ImageTransformApp() {
       showNotice("Upload one PNG, JPEG, or WebP image under 8 MB.", "danger");
     }
   });
-
-  const runImageAction = useCallback(
-    async (
-      action: "remove-background" | "flip",
-      options?: {
-        direction?: FlipDirection;
-      }
-    ) => {
-      if (!selectedImage) return;
-
-      setBusyAction(action);
-
-      try {
-        const response = await fetch(`/api/images/${selectedImage.id}/${action}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: action === "flip" ? JSON.stringify({ direction: options?.direction }) : undefined
-        });
-
-        if (!response.ok) {
-          throw new Error(await readError(response));
-        }
-
-        const body = (await response.json()) as { image: UplaneImage };
-        upsertImage(body.image);
-        showNotice(
-          action === "flip" ? "Image flipped." : "Background removed.",
-          "success"
-        );
-      } catch (error) {
-        showNotice(error instanceof Error ? error.message : "Processing failed.", "danger");
-        await loadImages();
-      } finally {
-        setBusyAction(null);
-      }
-    },
-    [loadImages, selectedImage, showNotice, upsertImage]
-  );
 
   const deleteImage = useCallback(
     async (image: UplaneImage) => {
@@ -233,12 +192,12 @@ export function ImageTransformApp() {
   }, [selectedImage, showNotice]);
 
   const isProcessing = selectedImage?.status === "processing";
-  const canRemoveBackground = Boolean(selectedImage) && !isProcessing;
-  const canFlip =
+  const isUploading = busyAction === "upload";
+  const canShare =
     Boolean(selectedImage?.processedUrl) &&
-    selectedImage?.processedStage === "background_removed" &&
-    !isProcessing;
-  const canShare = Boolean(selectedImage?.processedUrl) && !isProcessing;
+    selectedImage?.status === "complete" &&
+    !isProcessing &&
+    !isUploading;
 
   return (
     <main className="app-shell">
@@ -266,9 +225,9 @@ export function ImageTransformApp() {
             <div className="card-heading">
               <div>
                 <h2>Upload image</h2>
-                <p>PNG, JPEG, or WebP up to 8 MB.</p>
+                <p>Upload starts background removal and horizontal flip automatically.</p>
               </div>
-              {busyAction === "upload" ? <Loader2 className="spin" size={20} /> : null}
+              {isUploading ? <Loader2 className="spin" size={20} /> : null}
             </div>
 
             <div
@@ -279,9 +238,16 @@ export function ImageTransformApp() {
               <input {...getInputProps()} />
               <Upload size={28} aria-hidden="true" />
               <strong>{isDragActive ? "Drop the image" : "Drag an image here"}</strong>
-              <span>or choose a file from your computer</span>
-              <Button type="button" variant="secondary" onClick={open} disabled={busyAction === "upload"}>
-                Choose file
+              <span>PNG, JPEG, or WebP up to 8 MB.</span>
+              <Button type="button" variant="secondary" onClick={open} disabled={isUploading}>
+                {isUploading ? (
+                  <>
+                    <Loader2 className="spin" size={18} />
+                    Processing
+                  </>
+                ) : (
+                  "Choose file"
+                )}
               </Button>
             </div>
           </Card>
@@ -289,40 +255,22 @@ export function ImageTransformApp() {
           <Card>
             <div className="card-heading">
               <div>
-                <h2>Transform</h2>
-                <p>Remove the background, then flip the result horizontally.</p>
+                <h2>Processing</h2>
+                <p>Backend removes the background, flips horizontally, and stores the final PNG.</p>
               </div>
               {selectedImage ? (
                 <Badge tone={statusTone(selectedImage.status)}>{selectedImage.status}</Badge>
               ) : null}
             </div>
 
+            {isUploading ? (
+              <div className="pipeline-note">
+                <Loader2 className="spin" size={18} />
+                Uploading, removing background, and flipping horizontally.
+              </div>
+            ) : null}
+
             <div className="action-row">
-              <Button
-                type="button"
-                onClick={() => void runImageAction("remove-background")}
-                disabled={!canRemoveBackground || busyAction !== null}
-              >
-                {busyAction === "remove-background" ? (
-                  <Loader2 className="spin" size={18} />
-                ) : (
-                  <ImageIcon size={18} />
-                )}
-                Remove background
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => void runImageAction("flip", { direction: "horizontal" })}
-                disabled={!canFlip || busyAction !== null}
-              >
-                {busyAction === "flip" ? (
-                  <Loader2 className="spin" size={18} />
-                ) : (
-                  <FlipHorizontal2 size={18} />
-                )}
-                Flip horizontal
-              </Button>
               <Button
                 type="button"
                 variant="ghost"
@@ -362,7 +310,7 @@ export function ImageTransformApp() {
           <div className="card-heading">
             <div>
               <h2>Recent images</h2>
-              <p>Select an item to continue processing or copy its URL.</p>
+              <p>Select an item to preview, copy its URL, or delete it.</p>
             </div>
           </div>
 

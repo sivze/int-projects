@@ -1,7 +1,15 @@
 import { NextResponse } from "next/server";
 import { ApiError, errorResponse } from "@/lib/api/errors";
-import { createImageRecord, listImages } from "@/lib/images/repository";
+import {
+  createImageRecord,
+  listImages,
+  setImageFailed,
+  setImageProcessed,
+  setImageProcessing
+} from "@/lib/images/repository";
+import { removeBackground } from "@/lib/images/replicate";
 import { getImageObjectPaths, getSupabaseAdminClient, uploadImageObject } from "@/lib/images/storage";
+import { flipImage } from "@/lib/images/transform";
 import { validateImageUpload } from "@/lib/images/validation";
 
 export const runtime = "nodejs";
@@ -16,6 +24,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  let imageId: string | null = null;
+
   try {
     const supabase = getSupabaseAdminClient();
     const formData = await request.formData();
@@ -31,8 +41,8 @@ export async function POST(request: Request) {
       throw new ApiError(400, validation.message);
     }
 
-    const id = crypto.randomUUID();
-    const paths = getImageObjectPaths(id, validation.extension);
+    imageId = crypto.randomUUID();
+    const paths = getImageObjectPaths(imageId, validation.extension);
     const buffer = Buffer.from(await file.arrayBuffer());
     const originalUrl = await uploadImageObject({
       path: paths.originalPath,
@@ -43,7 +53,7 @@ export async function POST(request: Request) {
 
     const image = await createImageRecord(
       {
-        id,
+        id: imageId,
         originalPath: paths.originalPath,
         originalUrl,
         originalFileName: file.name,
@@ -53,8 +63,41 @@ export async function POST(request: Request) {
       supabase
     );
 
-    return NextResponse.json({ image }, { status: 201 });
+    await setImageProcessing(image.id, supabase);
+
+    const backgroundRemoved = await removeBackground(originalUrl);
+    await uploadImageObject({
+      path: paths.backgroundRemovedPath,
+      body: backgroundRemoved,
+      contentType: "image/png",
+      supabase
+    });
+
+    const flipped = await flipImage(backgroundRemoved, "horizontal");
+    const processedUrl = await uploadImageObject({
+      path: paths.horizontalFlippedPath,
+      body: flipped,
+      contentType: "image/png",
+      supabase
+    });
+
+    const processedImage = await setImageProcessed(
+      image.id,
+      {
+        processedPath: paths.horizontalFlippedPath,
+        processedUrl,
+        processedStage: "flipped"
+      },
+      supabase
+    );
+
+    return NextResponse.json({ image: processedImage }, { status: 201 });
   } catch (error) {
+    if (imageId) {
+      const message = error instanceof Error ? error.message : "Image processing failed.";
+      await setImageFailed(imageId, message).catch(() => undefined);
+    }
+
     return errorResponse(error);
   }
 }

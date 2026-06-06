@@ -67,11 +67,12 @@ POST   /api/images/:id/flip
 DELETE /api/images/:id
 ```
 
-The UI intentionally exposes the two process steps as separate actions:
+Upload is the only processing action. The backend runs the full pipeline before
+returning the processed record:
 
 1. Upload image.
-2. Remove background.
-3. Flip horizontally.
+2. Remove background with Replicate BRIA.
+3. Flip the background-removed image horizontally with `sharp`.
 4. Copy or open the processed URL.
 5. Delete the image set.
 

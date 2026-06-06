@@ -9,15 +9,14 @@ result, copy a unique URL, view history, and delete uploaded/processed assets.
 ## Product Flow
 
 1. User uploads one image via drag/drop or file picker.
-2. App immediately shows the original preview and creates a history item.
-3. User clicks `Remove background`.
-4. Backend calls Replicate BRIA, stores the transparent PNG as the current
-   processed image, and updates `processed_stage` to `background_removed`.
-5. User clicks `Flip`.
-6. Backend flips the current processed image locally with `sharp`, stores a new
-   processed PNG, updates `processed_stage` to `flipped`, and returns the hosted
-   processed URL.
-7. User can copy the processed URL.
+2. Backend stores the original image and creates a history item.
+3. Backend calls Replicate BRIA to remove the background.
+4. Backend stores the background-removed PNG as an intermediate object.
+5. Backend flips the background-removed image horizontally with `sharp`.
+6. Backend stores the final processed PNG, updates `processed_stage` to
+   `flipped`, and returns the hosted processed URL.
+7. App shows the original preview, final processed preview, and copy/delete
+   actions.
 8. User can delete the image record, which removes the original and all
    processed objects under that image's storage prefix.
 
@@ -27,13 +26,12 @@ result, copy a unique URL, view history, and delete uploaded/processed assets.
 - Clear current-image workspace with two user-facing previews:
   - `Original`
   - `Processed`
-- Explicit buttons after upload:
-  - `Remove background`
-  - `Flip horizontal`
-  - `Flip vertical` if implemented via parameter support
+- Upload starts the full processing pipeline automatically.
+- Explicit buttons after processing:
   - `Copy URL`
   - `Delete`
-- Per-step loading states and disabled buttons.
+- Clear loading state while upload, background removal, and horizontal flip are
+  running.
 - Toasts for success and errors.
 - History list with status badge, original thumbnail, processed thumbnail when
   available, processed URL, and delete action.
@@ -41,12 +39,10 @@ result, copy a unique URL, view history, and delete uploaded/processed assets.
 
 Button rules:
 
-- `Remove background` is enabled after upload and can regenerate the processed
-  image from the original.
-- `Flip horizontal` is enabled only when `processed_stage` is
-  `background_removed`.
-- After flip, `Copy URL` and `Open result` are enabled.
-- Do not make flip behave as a toggle. The assignment asks for horizontal flip,
+- `Choose file` is disabled while processing is in flight.
+- `Copy URL` is enabled only after the final flipped image is stored.
+- `Delete` is enabled for any selected image that is not currently processing.
+- Flip is not exposed as a toggle. The assignment asks for a processing step,
   not reversible editing.
 
 ## UI Components
@@ -82,7 +78,14 @@ DELETE /api/images/:id
 - Validate content type and file size.
 - Store original image in Supabase Storage.
 - Insert DB record with `uploaded` status.
-- Return image metadata and original URL.
+- Set status to `processing`.
+- Call Replicate BRIA with the stored original URL.
+- Store the background-removed PNG as an intermediate object.
+- Flip the background-removed image horizontally with `sharp`.
+- Store the final PNG in Supabase Storage.
+- Set `processed_path`, `processed_url`, `processed_stage = flipped`, and
+  `status = complete`.
+- Return final image metadata and processed URL.
 
 ### GET /api/images
 
